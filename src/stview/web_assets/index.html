@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Safetensors Viewer</title>
+    <link rel="stylesheet" href="/assets/app.css">
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">ST</div>
+          <div>
+            <strong>Safetensors</strong>
+            <span>Weight explorer</span>
+          </div>
+        </div>
+        <nav>
+          <a class="active" href="#overview"><span>01</span> Overview</a>
+          <a href="#tensors"><span>02</span> Tensors</a>
+          <a href="#shards"><span>03</span> Shards</a>
+          <a href="#integrity"><span>04</span> Integrity</a>
+        </nav>
+        <div class="sidebar-foot">
+          <span class="status-dot"></span>
+          Header-only mode
+          <small>No tensor values loaded</small>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">LOCAL MODEL</p>
+            <h1 id="model-name">Loading model…</h1>
+            <p id="model-path" class="model-path"></p>
+          </div>
+          <a class="api-link" href="/api/docs" target="_blank" rel="noreferrer">API docs <span>↗</span></a>
+        </header>
+
+        <section id="overview">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">AT A GLANCE</p>
+              <h2>Model overview</h2>
+            </div>
+            <span id="index-badge" class="badge">Detecting format</span>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric accent-violet">
+              <span>Tensors</span>
+              <strong id="metric-tensors">—</strong>
+              <small>named entries</small>
+            </article>
+            <article class="metric accent-cyan">
+              <span>Parameters</span>
+              <strong id="metric-params">—</strong>
+              <small id="metric-params-exact">—</small>
+            </article>
+            <article class="metric accent-amber">
+              <span>Tensor data</span>
+              <strong id="metric-size">—</strong>
+              <small id="metric-size-exact">—</small>
+            </article>
+            <article class="metric accent-green">
+              <span>Shards</span>
+              <strong id="metric-shards">—</strong>
+              <small id="metric-disk">—</small>
+            </article>
+          </div>
+
+          <div class="overview-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">PRECISION</p>
+                  <h3>Dtype distribution</h3>
+                </div>
+              </div>
+              <div id="dtype-bars" class="bars skeleton-block"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">STRUCTURE</p>
+                  <h3>Tensor ranks</h3>
+                </div>
+              </div>
+              <div id="rank-list" class="rank-list skeleton-block"></div>
+            </article>
+          </div>
+
+          <article class="panel module-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">MODULE MAP</p>
+                <h3>Largest module groups</h3>
+              </div>
+              <span class="muted">Grouped at depth 2</span>
+            </div>
+            <div id="module-list" class="module-list skeleton-block"></div>
+          </article>
+        </section>
+
+        <section id="tensors">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">EXPLORE</p>
+              <h2>Tensor index</h2>
+            </div>
+            <span id="result-count" class="muted">—</span>
+          </div>
+
+          <article class="panel tensor-panel">
+            <div class="filters">
+              <label class="search-field">
+                <span aria-hidden="true">⌕</span>
+                <input id="search" type="search" placeholder="Search tensor names…" autocomplete="off">
+              </label>
+              <label>
+                <span class="sr-only">Dtype</span>
+                <select id="dtype-filter"><option value="">All dtypes</option></select>
+              </label>
+              <label>
+                <span class="sr-only">Rank</span>
+                <select id="rank-filter"><option value="">All ranks</option></select>
+              </label>
+              <label>
+                <span class="sr-only">Shard</span>
+                <select id="shard-filter"><option value="">All shards</option></select>
+              </label>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th><button data-sort="name">Name <span>↕</span></button></th>
+                    <th>Shape</th>
+                    <th><button data-sort="dtype">Dtype <span>↕</span></button></th>
+                    <th class="number"><button data-sort="params">Parameters <span>↕</span></button></th>
+                    <th class="number"><button data-sort="size">Size <span>↕</span></button></th>
+                    <th>Shard</th>
+                  </tr>
+                </thead>
+                <tbody id="tensor-body">
+                  <tr><td colspan="6" class="loading-row">Loading tensor metadata…</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <span id="page-range">—</span>
+              <div>
+                <button id="prev-page" class="button secondary">← Previous</button>
+                <button id="next-page" class="button secondary">Next →</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="shards">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">STORAGE</p>
+              <h2>Weight shards</h2>
+            </div>
+          </div>
+          <div id="shard-list" class="shard-grid skeleton-block"></div>
+        </section>
+
+        <section id="integrity">
+          <article class="panel verify-panel">
+            <div>
+              <p class="eyebrow">INTEGRITY</p>
+              <h2>Validate this model</h2>
+              <p>Check offsets, dtype sizes, shard mappings and the Hugging Face index with the official safetensors backend.</p>
+            </div>
+            <button id="verify-button" class="button primary">Run verification</button>
+            <div id="verify-result" class="verify-result" hidden></div>
+          </article>
+        </section>
+
+        <footer>
+          <span>stview · local safetensors inspector</span>
+          <span>Read-only · header metadata</span>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="tensor-dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">TENSOR DETAIL</p>
+          <h2 id="detail-name">—</h2>
+        </div>
+        <button id="close-dialog" class="icon-button" aria-label="Close">×</button>
+      </div>
+      <div id="detail-grid" class="detail-grid"></div>
+      <div class="dialog-actions">
+        <button id="copy-name" class="button secondary">Copy tensor name</button>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>
